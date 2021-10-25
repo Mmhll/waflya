@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.mhl.medit.R
+import com.mhl.medit.retrofit.feelings
 
-class FeelRecycler(val context: Context, val list: ArrayList<feel>) :
+class FeelRecycler(val context: Context, val feelings: feelings) :
     RecyclerView.Adapter<FeelRecycler.MyVH>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeelRecycler.MyVH {
         val root = LayoutInflater.from(context).inflate(R.layout.feel_adapter, parent, false)
@@ -20,11 +22,11 @@ class FeelRecycler(val context: Context, val list: ArrayList<feel>) :
         val textView : TextView = itemView.findViewById(R.id.text_feel)
     }
     override fun onBindViewHolder(holder: FeelRecycler.MyVH, position: Int) {
-        holder.image.setImageResource(list[position].image)
-        holder.textView.setText(list[position].name_feel)
+        Glide.with(context).load(feelings.data[position].image).into(holder.image)
+        holder.textView.setText(feelings.data[position].title)
     }
 
     override fun getItemCount(): Int {
-        return list.size
+        return feelings.data.size
     }
 }
