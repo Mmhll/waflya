@@ -9,10 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.mhl.medit.R
-import com.mhl.medit.recadapters.FeelRecycler
-import com.mhl.medit.recadapters.MyFeel
-import com.mhl.medit.recadapters.MyState
-import com.mhl.medit.recadapters.StateRecycler
+import com.mhl.medit.recadapters.*
 import com.mhl.medit.retrofit.MyRetrofit
 import com.mhl.medit.retrofit.feelings
 import com.mhl.medit.retrofit.quotes
@@ -29,13 +26,25 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val root = inflater.inflate(R.layout.fragment_home, container, false)
         val quotes = MyRetrofit().getRetrofit()
         val api_ret = quotes.create(retrofit_api::class.java)
-        val feelingsCall : Call<feelings> = api_ret.getFeelings()
         val quotes_call : Call<quotes> = api_ret.getQuotes()
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val feelRecycler : RecyclerView = root.findViewById(R.id.recyclerView)
-        val stateRecycler : RecyclerView = root.findViewById(R.id.recyclerView2)
+        val feelings_call : Call<feelings> = api_ret.getFeelings()
+        val stateRecycler : RecyclerView = root.findViewById(R.id.recyclerView)
+        val feelRecycler : RecyclerView = root.findViewById(R.id.recyclerView2)
+        feelings_call.enqueue(object  : Callback<feelings>{
+            override fun onResponse(call: Call<feelings>, response: Response<feelings>) {
+                if (response.isSuccessful) {
+                    feelRecycler.adapter =
+                        response.body()?.let { FeelRecycler(requireContext(), it) }
+                }
+            }
+
+            override fun onFailure(call: Call<feelings>, t: Throwable) {
+                Log.d("FAILURE: ", t.toString())
+            }
+        })
         quotes_call.enqueue(object : Callback<quotes>{
             override fun onResponse(call: Call<quotes>, response: Response<quotes>) {
                 if (response.isSuccessful) {
@@ -45,17 +54,6 @@ class HomeFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<quotes>, t: Throwable) {
-            }
-        })
-        feelingsCall.enqueue(object : Callback<feelings>{
-            override fun onResponse(call: Call<feelings>, response: Response<feelings>) {
-                if (response.isSuccessful) {
-                    feelRecycler.adapter =
-                        response.body()?.let { FeelRecycler(requireContext(), it) }
-                }
-            }
-
-            override fun onFailure(call: Call<feelings>, t: Throwable) {
             }
 
         })
